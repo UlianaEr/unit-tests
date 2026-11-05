@@ -19,11 +19,18 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    # Этот шаг автоматически найдет файл .sln в любой папке
+    - name: Find Solution File
+      run: echo "SOLUTION_FILE=$(find . -name '*.sln' -print -quit)" » $GITHUB_ENV
+
+    - name: Show found solution
+      run: echo "Found solution file at $SOLUTION_FILE"
+
     - name: Restore dependencies
-      run: dotnet restore **/*.sln
+      run: dotnet restore "$SOLUTION_FILE"
 
     - name: Build
-      run: dotnet build **/*.sln --no-restore --configuration Release
+      run: dotnet build "$SOLUTION_FILE" --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test **/*.sln --no-build --configuration Release --verbosity normal
+      run: dotnet test "$SOLUTION_FILE" --no-build --configuration Release --verbosity normal
