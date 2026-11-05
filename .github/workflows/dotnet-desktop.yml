@@ -19,21 +19,19 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Find Projects
+    # Находим абсолютно все файлы .csproj в репозитории
+    - name: Find all projects
       run: |
-        echo "MAIN_PROJECT=$(find . -name 'Orders.csproj' -print -quit)" » $GITHUB_ENV
-        echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
+        echo "PROJECTS=$(find . -name '*.csproj' | tr '\n' ' ')" » $GITHUB_ENV
+        echo "Найдены проекты: $PROJECTS"
 
-    # Принудительно восстанавливаем и собираем основной проект
-    - name: Restore Main
-      run: dotnet restore "$MAIN_PROJECT"
+    # Восстанавливаем зависимости для всех найденных проектов сразу
+    - name: Restore all
+      run: |
+        for proj in $PROJECTS; do
+          dotnet restore "$proj"
+        done
 
-    - name: Build Main
-      run: dotnet build "$MAIN_PROJECT" --no-restore --configuration Release
-
-    # Теперь восстанавливаем тесты (они подхватят уже собранный основной проект)
-    - name: Restore Tests
-      run: dotnet restore "$TEST_PROJECT"
-
+    # Собираем и запускаем тесты (dotnet test сам соберет зависимости)
     - name: Test
-      run: dotnet test "$TEST_PROJECT" --configuration Release --verbosity normal
+      run: dotnet test --configuration Release --verbosity normal
