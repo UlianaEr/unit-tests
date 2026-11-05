@@ -19,18 +19,22 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    # Этот шаг автоматически найдет файл .sln в любой папке
-    - name: Find Solution File
-      run: echo "SOLUTION_FILE=$(find . -name '*.sln' -print -quit)" » $GITHUB_ENV
+    # Находим основной проект и проект с тестами напрямую
+    - name: Find Projects
+      run: |
+        echo "SRC_PROJECT=$(find . -name 'Orders.csproj' -print -quit)" » $GITHUB_ENV
+        echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
 
-    - name: Show found solution
-      run: echo "Found solution file at $SOLUTION_FILE"
+    - name: Show found projects
+      run: |
+        echo "Main project: $SRC_PROJECT"
+        echo "Test project: $TEST_PROJECT"
 
-    - name: Restore dependencies
-      run: dotnet restore "$SOLUTION_FILE"
+    - name: Restore test dependencies
+      run: dotnet restore "$TEST_PROJECT"
 
-    - name: Build
-      run: dotnet build "$SOLUTION_FILE" --no-restore --configuration Release
+    - name: Build main project
+      run: dotnet build "$SRC_PROJECT" --configuration Release
 
-    - name: Test
-      run: dotnet test "$SOLUTION_FILE" --no-build --configuration Release --verbosity normal
+    - name: Test project
+      run: dotnet test "$TEST_PROJECT" --configuration Release --verbosity normal
