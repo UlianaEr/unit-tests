@@ -19,11 +19,18 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    # Ищем файл тестового проекта на любой глубине
+    - name: Find Test Project
+      run: echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
+
+    - name: Show found path
+      run: echo "Тесты лежат тут -> $TEST_PROJECT"
+
     - name: Restore dependencies
-      run: dotnet restore tests/Orders.Tests/Orders.Tests.csproj
+      run: dotnet restore "$TEST_PROJECT"
 
     - name: Build
-      run: dotnet build tests/Orders.Tests/Orders.Tests.csproj --no-restore --configuration Release
+      run: dotnet build "$TEST_PROJECT" --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test tests/Orders.Tests/Orders.Tests.csproj --no-build --configuration Release --verbosity normal
+      run: dotnet test "$TEST_PROJECT" --no-build --configuration Release --verbosity normal
