@@ -19,22 +19,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    # Находим основной проект и проект с тестами напрямую
-    - name: Find Projects
-      run: |
-        echo "SRC_PROJECT=$(find . -name 'Orders.csproj' -print -quit)" » $GITHUB_ENV
-        echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
+    - name: Restore dependencies
+      run: dotnet restore tests/Orders.Tests/Orders.Tests.csproj
 
-    - name: Show found projects
-      run: |
-        echo "Main project: $SRC_PROJECT"
-        echo "Test project: $TEST_PROJECT"
+    - name: Build
+      run: dotnet build tests/Orders.Tests/Orders.Tests.csproj --no-restore --configuration Release
 
-    - name: Restore test dependencies
-      run: dotnet restore "$TEST_PROJECT"
-
-    - name: Build main project
-      run: dotnet build "$SRC_PROJECT" --configuration Release
-
-    - name: Test project
-      run: dotnet test "$TEST_PROJECT" --configuration Release --verbosity normal
+    - name: Test
+      run: dotnet test tests/Orders.Tests/Orders.Tests.csproj --no-build --configuration Release --verbosity normal
