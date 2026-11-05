@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orders\Orders.csproj" />
+    <ProjectReference Include="**\Orders.csproj" />
     <Using Include="OrdersPractice.Models" />
     <Using Include="OrdersPractice.Services" />
   </ItemGroup>
