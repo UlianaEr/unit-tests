@@ -19,18 +19,21 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    # Ищем файл тестового проекта на любой глубине
-    - name: Find Test Project
-      run: echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
+    - name: Find Projects
+      run: |
+        echo "MAIN_PROJECT=$(find . -name 'Orders.csproj' -print -quit)" » $GITHUB_ENV
+        echo "TEST_PROJECT=$(find . -name 'Orders.Tests.csproj' -print -quit)" » $GITHUB_ENV
 
-    - name: Show found path
-      run: echo "Тесты лежат тут -> $TEST_PROJECT"
+    # Принудительно восстанавливаем и собираем основной проект
+    - name: Restore Main
+      run: dotnet restore "$MAIN_PROJECT"
 
-    - name: Restore dependencies
+    - name: Build Main
+      run: dotnet build "$MAIN_PROJECT" --no-restore --configuration Release
+
+    # Теперь восстанавливаем тесты (они подхватят уже собранный основной проект)
+    - name: Restore Tests
       run: dotnet restore "$TEST_PROJECT"
 
-    - name: Build
-      run: dotnet build "$TEST_PROJECT" --no-restore --configuration Release
-
     - name: Test
-      run: dotnet test "$TEST_PROJECT" --no-build --configuration Release --verbosity normal
+      run: dotnet test "$TEST_PROJECT" --configuration Release --verbosity normal
